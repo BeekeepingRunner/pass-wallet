@@ -1,0 +1,37 @@
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+    <head></head>
+    <body>
+        <h1>Sign up</h1>
+        <form th:action="@{/signup/proceed}" th:object="${signupModel}" method="post">
+            <table>
+                <tr>
+                    <td>Login:</td>
+                    <td><input type='text' name='username' value=''></td>
+                </tr>
+                <tr>
+                    <td>Password:</td>
+                    <td><input type='password' name='password'/></td>
+                </tr>
+            </table>
+
+            <p>How do you want your password to be stored:</p>
+            <table>
+                <tr>
+                    <td>
+                        <input type="radio" id="option1" name="option1" value="1" th:field="*{passwordStorageOption}">
+                        <label class="custom-control-label" for="option1">SHA513 with salt</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="radio" id="option2" name="option2" value="2" th:field="*{passwordStorageOption}">
+                        <label class="custom-control-label" for="option2">HMAC</label>
+                    </td>
+                </tr>
+                <tr>
+                    <td><input name="submit" type="submit" value="submit"/></td>
+                </tr>
+            </table>
+        </form>
+    </body>
+</html>
