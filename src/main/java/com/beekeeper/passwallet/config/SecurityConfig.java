@@ -15,11 +15,17 @@ public class SecurityConfig {
 
         http.csrf()
                 .disable()
+                .authorizeHttpRequests()
+                .requestMatchers("/login")
+                .permitAll()
+                .requestMatchers("/*")
+                .authenticated()
+                .and()
                 .formLogin()
-                .loginPage("/login.html")
+                .loginPage("/login")
                 .loginProcessingUrl("/perform_login")
-                .defaultSuccessUrl("/homepage.html",true)
-                .failureUrl("/login.html?error=true");
+                .defaultSuccessUrl("/profile",true)
+                .failureUrl("/login?error=true");
 
         return http.build();
     }
