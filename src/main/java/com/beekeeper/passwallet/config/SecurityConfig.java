@@ -18,6 +18,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers("/login").permitAll()
                 .requestMatchers("/signup").permitAll()
+                .requestMatchers("/signup/proceed").permitAll()
                 .requestMatchers("/*").authenticated()
                 .and()
                 .formLogin()
