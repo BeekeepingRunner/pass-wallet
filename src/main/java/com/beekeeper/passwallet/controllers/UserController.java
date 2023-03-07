@@ -2,7 +2,12 @@ package com.beekeeper.passwallet.controllers;
 
 import com.beekeeper.passwallet.dto.LoginModel;
 import com.beekeeper.passwallet.dto.SignupModel;
+import com.beekeeper.passwallet.entities.UserEntity;
 import com.beekeeper.passwallet.services.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -12,6 +17,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.Optional;
 
 @Controller
 @AllArgsConstructor
@@ -29,12 +36,24 @@ public class UserController {
     }
 
     @PostMapping("/login/proceed")
-    public String login(@Valid @ModelAttribute(LOGIN_MODEL_ATTR_NAME) LoginModel loginModel) {
-        if (userService.login(loginModel)) {
+    public String login(@Valid @ModelAttribute(LOGIN_MODEL_ATTR_NAME) LoginModel loginModel,
+                        HttpServletRequest request,
+                        HttpServletResponse response) {
+        final Optional<UserEntity> user = userService.login(loginModel);
+        if (user.isPresent()) {
+            createSessionCookie(request, response, user.get());
             return "my-profile";
         } else {
             return "redirect:/login";
         }
+    }
+
+    private void createSessionCookie(HttpServletRequest request, HttpServletResponse response, UserEntity user) {
+        final HttpSession session = request.getSession();
+        session.setAttribute("login", user.getLogin());
+        session.setMaxInactiveInterval(15 * 60);
+        final Cookie sessionCookie = new Cookie("LOGINID", session.getId());
+        response.addCookie(sessionCookie);
     }
 
     @GetMapping("/signup")

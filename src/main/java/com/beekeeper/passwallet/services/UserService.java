@@ -64,10 +64,7 @@ public class UserService {
     }
 
     @Transactional
-    public boolean login(final LoginModel loginModel) {
-        userRepository.findAll().forEach(u -> System.out.println(u.toString()));
-
-        System.out.println("Login");
+    public Optional<UserEntity> login(final LoginModel loginModel) {
         final Optional<UserEntity> user = userRepository.findByLogin(loginModel.getLogin());
         if (user.isPresent()) {
             String loginHash = "";
@@ -79,9 +76,9 @@ public class UserService {
             }
 
             final String passwordHash = user.get().getPasswordHash();
-            return loginHash.equals(passwordHash);
+            return loginHash.equals(passwordHash) ? user : Optional.empty();
         } else {
-            return false;
+            return Optional.empty();
         }
     }
 }
