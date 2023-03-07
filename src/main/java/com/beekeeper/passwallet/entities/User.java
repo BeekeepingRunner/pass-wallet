@@ -25,5 +25,5 @@ public class User {
     private String salt;
 
     @Column
-    private Boolean isPasswordKeptAsHash;
+    private Boolean isPasswordKeptAsHmac;
 }

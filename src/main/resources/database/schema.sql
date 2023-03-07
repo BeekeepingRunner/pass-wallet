@@ -3,7 +3,7 @@ CREATE TABLE USER (
     login                       VARCHAR(30) NOT NULL,
     password_hash               VARCHAR(512) NOT NULL,
     salt                        VARCHAR(20) NOT NULL,
-    is_password_kept_as_hash    BOOLEAN NULL,
+    is_password_kept_as_hmac    BOOLEAN NULL,
 
     PRIMARY KEY (id)
 );
