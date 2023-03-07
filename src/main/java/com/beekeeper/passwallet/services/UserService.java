@@ -5,17 +5,22 @@ import com.beekeeper.passwallet.dto.SignupModel;
 import com.beekeeper.passwallet.entities.User;
 import com.beekeeper.passwallet.repositories.PasswordRepository;
 import com.beekeeper.passwallet.repositories.UserRepository;
+import com.beekeeper.passwallet.utils.CryptoUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import static com.beekeeper.passwallet.utils.CryptoUtils.calculateHMAC;
-import static com.beekeeper.passwallet.utils.CryptoUtils.calculateSHA512;
+import static com.beekeeper.passwallet.utils.CryptoUtils.*;
 
 @Service
 @AllArgsConstructor
 public class UserService {
+
+
+    @Value("${pepper}")
+    private final String PEPPER;
 
     private final UserRepository userRepository;
     private final PasswordRepository passwordRepository;
@@ -24,16 +29,27 @@ public class UserService {
     public void signup(@Valid final SignupModel signupModel) {
         User user = new User();
         user.setLogin(signupModel.getLogin());
-        String hash = getPasswordHash(user, signupModel);
+        setUserPassword(user, signupModel);
+        userRepository.save(user);
+    }
+
+    private void setUserPassword(final User user, SignupModel signupModel) {
+        final String salt = CryptoUtils.generateSalt();
+        user.setSalt(salt);
+
+        String hash = hashPassword(user, signupModel);
         user.setPasswordHash(hash);
     }
 
-    private String getPasswordHash(User user, final SignupModel signupModel) {
+    private String hashPassword(User user, final SignupModel signupModel) {
         int storageOption = signupModel.getPasswordStorageOption();
+        String plainPassword = signupModel.getPassword();
+        String fullPassword = plainPassword + user.getSalt() + PEPPER;
+
         if (storageOption == PasswordStorageOption.SHA_513.getValue()) {
-            return calculateSHA512(signupModel.getPassword());
+            return calculateSHA512(fullPassword);
         } else if (storageOption == PasswordStorageOption.HMAC.getValue()) {
-            return calculateHMAC(signupModel.getPassword(), "HARDCODED_KEY"); // TODO: secure key or just move it
+            return calculateHMAC(fullPassword, SECRET_KEY);
         } else {
             throw new RuntimeException("Cannot sign up the user: Invalid password storage option.");
         }
