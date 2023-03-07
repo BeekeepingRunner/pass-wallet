@@ -6,11 +6,11 @@
             <table>
                 <tr>
                     <td>Login:</td>
-                    <td><input type='text' name='username' value=''></td>
+                    <td><input type='text' name='username' value='' th:field="*{login}"></td>
                 </tr>
                 <tr>
                     <td>Password:</td>
-                    <td><input type='password' name='password'/></td>
+                    <td><input type='password' name='password' th:field="*{password}"/></td>
                 </tr>
             </table>
 
@@ -18,20 +18,21 @@
             <table>
                 <tr>
                     <td>
-                        <input type="radio" id="option1" name="option1" value="1" th:field="*{passwordStorageOption}">
+                        <input type="radio" id="option1" name="option1" value="0"
+                               th:field="*{passwordStorageOption}"/>
                         <label class="custom-control-label" for="option1">SHA513 with salt</label>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <input type="radio" id="option2" name="option2" value="2" th:field="*{passwordStorageOption}">
+                        <input type="radio" id="option2" name="option2" value="1"
+                               th:field="*{passwordStorageOption}"/>
                         <label class="custom-control-label" for="option2">HMAC</label>
                     </td>
                 </tr>
-                <tr>
-                    <td><input name="submit" type="submit" value="submit"/></td>
-                </tr>
             </table>
+            <br>
+            <input name="submit" type="submit" value="submit"/>
         </form>
     </body>
 </html>
