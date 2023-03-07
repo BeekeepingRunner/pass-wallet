@@ -1,7 +1,7 @@
 package com.beekeeper.passwallet.repositories;
 
-import com.beekeeper.passwallet.entities.User;
+import com.beekeeper.passwallet.entities.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
 }

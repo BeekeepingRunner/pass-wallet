@@ -2,38 +2,41 @@ package com.beekeeper.passwallet.services;
 
 import com.beekeeper.passwallet.dto.PasswordStorageOption;
 import com.beekeeper.passwallet.dto.SignupModel;
-import com.beekeeper.passwallet.entities.User;
-import com.beekeeper.passwallet.repositories.PasswordRepository;
+import com.beekeeper.passwallet.entities.UserEntity;
 import com.beekeeper.passwallet.repositories.UserRepository;
 import com.beekeeper.passwallet.utils.CryptoUtils;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import static com.beekeeper.passwallet.utils.CryptoUtils.*;
+import static com.beekeeper.passwallet.utils.CryptoUtils.SECRET_KEY;
+import static com.beekeeper.passwallet.utils.CryptoUtils.calculateHMAC;
+import static com.beekeeper.passwallet.utils.CryptoUtils.calculateSHA512;
 
 @Service
-@AllArgsConstructor
 public class UserService {
 
-
     @Value("${pepper}")
-    private final String PEPPER;
+    private String PEPPER;
 
     private final UserRepository userRepository;
-    private final PasswordRepository passwordRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Transactional
     public void signup(@Valid final SignupModel signupModel) {
-        User user = new User();
-        user.setLogin(signupModel.getLogin());
-        setUserPassword(user, signupModel);
-        userRepository.save(user);
+        UserEntity userEntity = new UserEntity();
+        userEntity.setLogin(signupModel.getLogin());
+        setUserPassword(userEntity, signupModel);
+        userRepository.save(userEntity);
     }
 
-    private void setUserPassword(final User user, SignupModel signupModel) {
+    private void setUserPassword(final UserEntity user, SignupModel signupModel) {
         final String salt = CryptoUtils.generateSalt();
         user.setSalt(salt);
 
@@ -41,14 +44,16 @@ public class UserService {
         user.setPasswordHash(hash);
     }
 
-    private String hashPassword(User user, final SignupModel signupModel) {
+    private String hashPassword(UserEntity user, final SignupModel signupModel) {
         int storageOption = signupModel.getPasswordStorageOption();
         String plainPassword = signupModel.getPassword();
         String fullPassword = plainPassword + user.getSalt() + PEPPER;
 
         if (storageOption == PasswordStorageOption.SHA_513.getValue()) {
+            user.setIsPasswordKeptAsHmac(false);
             return calculateSHA512(fullPassword);
         } else if (storageOption == PasswordStorageOption.HMAC.getValue()) {
+            user.setIsPasswordKeptAsHmac(true);
             return calculateHMAC(fullPassword, SECRET_KEY);
         } else {
             throw new RuntimeException("Cannot sign up the user: Invalid password storage option.");
