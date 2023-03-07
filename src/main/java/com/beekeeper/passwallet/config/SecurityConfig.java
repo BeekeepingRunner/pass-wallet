@@ -17,15 +17,13 @@ public class SecurityConfig {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers("/login").permitAll()
+                .requestMatchers("/login/proceed").permitAll()
                 .requestMatchers("/signup").permitAll()
                 .requestMatchers("/signup/proceed").permitAll()
                 .requestMatchers("/*").authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/perform_login")
-                .defaultSuccessUrl("/profile",true)
-                .failureUrl("/login?error=true");
+                .loginPage("/login");
 
         return http.build();
     }

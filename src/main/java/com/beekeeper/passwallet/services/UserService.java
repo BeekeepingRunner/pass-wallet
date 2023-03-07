@@ -1,5 +1,6 @@
 package com.beekeeper.passwallet.services;
 
+import com.beekeeper.passwallet.dto.LoginModel;
 import com.beekeeper.passwallet.dto.PasswordStorageOption;
 import com.beekeeper.passwallet.dto.SignupModel;
 import com.beekeeper.passwallet.entities.UserEntity;
@@ -10,6 +11,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import static com.beekeeper.passwallet.utils.CryptoUtils.SECRET_KEY;
 import static com.beekeeper.passwallet.utils.CryptoUtils.calculateHMAC;
@@ -57,6 +60,28 @@ public class UserService {
             return calculateHMAC(fullPassword, SECRET_KEY);
         } else {
             throw new RuntimeException("Cannot sign up the user: Invalid password storage option.");
+        }
+    }
+
+    @Transactional
+    public boolean login(final LoginModel loginModel) {
+        userRepository.findAll().forEach(u -> System.out.println(u.toString()));
+
+        System.out.println("Login");
+        final Optional<UserEntity> user = userRepository.findByLogin(loginModel.getLogin());
+        if (user.isPresent()) {
+            String loginHash = "";
+            String plainLoginPassword = loginModel.getPassword() + user.get().getSalt() + PEPPER;
+            if (user.get().getIsPasswordKeptAsHmac()) {
+                loginHash = calculateHMAC(plainLoginPassword, SECRET_KEY);
+            } else {
+                loginHash = calculateSHA512(plainLoginPassword);
+            }
+
+            final String passwordHash = user.get().getPasswordHash();
+            return loginHash.equals(passwordHash);
+        } else {
+            return false;
         }
     }
 }
