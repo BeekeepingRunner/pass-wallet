@@ -1,6 +1,7 @@
 package com.beekeeper.passwallet.controllers;
 
 import com.beekeeper.passwallet.dto.LoginModel;
+import com.beekeeper.passwallet.dto.PassChangeRequest;
 import com.beekeeper.passwallet.dto.SignupModel;
 import com.beekeeper.passwallet.entities.UserEntity;
 import com.beekeeper.passwallet.services.UserService;
@@ -33,5 +34,11 @@ public class UserController {
     public ResponseEntity<String> signup(@RequestBody SignupModel signupModel) {
         userService.signup(signupModel);
         return ResponseEntity.ok("Successfull sign up");
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestBody PassChangeRequest request) {
+        final String response = userService.changePassword(request);
+        return ResponseEntity.ok(response);
     }
 }
