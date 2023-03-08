@@ -32,11 +32,11 @@ public class UserService {
     }
 
     @Transactional
-    public void signup(@Valid final SignupModel signupModel) {
+    public UserEntity signup(@Valid final SignupModel signupModel) {
         UserEntity userEntity = new UserEntity();
         userEntity.setLogin(signupModel.getLogin());
         setUserPassword(userEntity, signupModel);
-        userRepository.save(userEntity);
+        return userRepository.save(userEntity);
     }
 
     private void setUserPassword(final UserEntity user, SignupModel signupModel) {

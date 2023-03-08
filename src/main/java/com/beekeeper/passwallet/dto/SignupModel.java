@@ -18,11 +18,11 @@ import lombok.ToString;
 public class SignupModel {
 
     @NotEmpty
-    @Size(min = 5, max = 30)
+    @Size(min = 2, max = 30)
     private String login;
 
     @NotEmpty
-    @Size(min = 8, max = 30)
+    @Size(min = 2, max = 30)
     private String password;
 
     @NotNull
