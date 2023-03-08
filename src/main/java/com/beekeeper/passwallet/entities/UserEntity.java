@@ -24,6 +24,9 @@ public class UserEntity {
     private String passwordHash;
 
     @Column
+    private String masterPassword;
+
+    @Column
     private String salt;
 
     @Column
