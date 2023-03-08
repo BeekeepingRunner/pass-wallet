@@ -1,2 +1,2 @@
 # pass-wallet
-Simple password wallet
+Presentational backend of theoretical password wallet application (for university purposes)
