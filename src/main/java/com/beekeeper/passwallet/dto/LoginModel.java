@@ -23,4 +23,8 @@ public class LoginModel {
     @NotEmpty
     @Size(min = 2, max = 30)
     private String password;
+
+    @NotEmpty
+    @Size(min = 1, max = 30)
+    private String masterPassword;
 }

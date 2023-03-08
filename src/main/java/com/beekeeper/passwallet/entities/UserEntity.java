@@ -5,8 +5,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import lombok.Data;
+
+import java.util.Collection;
 
 @Entity
 @Data
@@ -24,8 +28,15 @@ public class UserEntity {
     private String passwordHash;
 
     @Column
+    private String masterPassword;
+
+    @Column
     private String salt;
 
     @Column
     private Boolean isPasswordKeptAsHmac;
+
+    @OneToMany
+    @JoinColumn(name = "id_user")
+    private Collection<Password> passwords;
 }

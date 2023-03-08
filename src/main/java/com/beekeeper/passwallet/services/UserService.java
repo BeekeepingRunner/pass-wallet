@@ -41,6 +41,7 @@ public class UserService {
     public UserEntity signup(@Valid final SignupModel signupModel) {
         UserEntity userEntity = new UserEntity();
         userEntity.setLogin(signupModel.getLogin());
+        userEntity.setMasterPassword(signupModel.getMasterPassword());
         setUserPassword(userEntity, signupModel);
         return userRepository.save(userEntity);
     }
@@ -70,19 +71,23 @@ public class UserService {
 
     @Transactional
     public Optional<UserEntity> login(final LoginModel loginModel) {
-        final Optional<UserEntity> user = userRepository.findByLogin(loginModel.getLogin());
-        if (user.isPresent()) {
+        final Optional<UserEntity> optionalUser = userRepository.findByLogin(loginModel.getLogin());
+        if (optionalUser.isPresent()) {
+            final UserEntity user = optionalUser.get();
             String loginHash = "";
             String plainLoginPassword = loginModel.getPassword() + PEPPER;
-            if (user.get().getIsPasswordKeptAsHmac()) {
+            if (user.getIsPasswordKeptAsHmac()) {
                 loginHash = calculateHMAC(plainLoginPassword, SECRET_KEY);
             } else {
-                plainLoginPassword += user.get().getSalt();
+                plainLoginPassword += user.getSalt();
                 loginHash = calculateSHA512(plainLoginPassword);
             }
 
-            final String passwordHash = user.get().getPasswordHash();
-            return loginHash.equals(passwordHash) ? user : Optional.empty();
+            final String passwordHash = user.getPasswordHash();
+            return loginHash.equals(passwordHash)
+                    && loginModel.getMasterPassword().equals(user.getMasterPassword())
+                    ? optionalUser
+                    : Optional.empty();
         } else {
             return Optional.empty();
         }
@@ -91,24 +96,35 @@ public class UserService {
     @Transactional
     public String changePassword(PassChangeRequest request) {
         final UserEntity user = getById(request.getUserId());
-        final LoginModel loginModel = new LoginModel(user.getLogin(), request.getOldPassword());
-        final Optional<UserEntity> optional = login(loginModel);
-        if (optional.isPresent()) {
-            String newPassHash = "";
-            String plainNewPassword = request.getNewPassword() + PEPPER;
-            if (user.getIsPasswordKeptAsHmac()) {
-                newPassHash = calculateHMAC(plainNewPassword, SECRET_KEY);
-            } else {
-                user.setSalt(generateSalt());
-                plainNewPassword += user.getSalt();
-                newPassHash = calculateSHA512(plainNewPassword);
-            }
 
-            user.setPasswordHash(newPassHash);
-            userRepository.save(user);
-            return "Password changed successfully";
+        // TODO: refactor
+        // chech old pass
+        String oldPassHash = "";
+        String plainOldPassword = request.getOldPassword() + PEPPER;
+        if (user.getIsPasswordKeptAsHmac()) {
+            oldPassHash = calculateHMAC(plainOldPassword, SECRET_KEY);
         } else {
+            plainOldPassword += user.getSalt();
+            oldPassHash = calculateSHA512(plainOldPassword);
+        }
+
+        if (!oldPassHash.equals(user.getPasswordHash())) {
             return "Old password is incorrect";
         }
+
+        // change pass
+        String newPassHash = "";
+        String plainNewPassword = request.getNewPassword() + PEPPER;
+        if (user.getIsPasswordKeptAsHmac()) {
+            newPassHash = calculateHMAC(plainNewPassword, SECRET_KEY);
+        } else {
+            user.setSalt(generateSalt());
+            plainNewPassword += user.getSalt();
+            newPassHash = calculateSHA512(plainNewPassword);
+        }
+
+        user.setPasswordHash(newPassHash);
+        userRepository.save(user);
+        return "Password changed successfully";
     }
 }
