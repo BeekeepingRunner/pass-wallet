@@ -2,11 +2,13 @@ package com.beekeeper.passwallet.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -17,6 +19,8 @@ public class CryptoUtils {
     public static final String SECRET_KEY = "ThebesTSecretKey";
     public static final String SHA_512 = "SHA-512";
     public static final int SALT_LENGTH = 20;
+
+    private static final String ENCRYPTION_ALGO = "AES";
 
     public static String calculateSHA512(String text) {
         try {
@@ -51,5 +55,35 @@ public class CryptoUtils {
 
     public static String generateSalt() {
         return RandomStringUtils.randomAlphanumeric(SALT_LENGTH);
+    }
+
+    public static String encrypt(String data, String keyValue) throws Exception {
+        Cipher c = Cipher.getInstance(ENCRYPTION_ALGO);
+        final byte[] keyMD5 = calculateMD5(keyValue);
+        c.init(Cipher.ENCRYPT_MODE, generateKey(keyMD5));
+        byte[] encVal = c.doFinal(data.getBytes());
+        return Base64.getEncoder().encodeToString(encVal);
+    }
+
+    public static String decrypt(String encryptedData, String keyValue) throws Exception {
+        Cipher c = Cipher.getInstance(ENCRYPTION_ALGO);
+        final byte[] keyMD5 = calculateMD5(keyValue);
+        c.init(Cipher.DECRYPT_MODE, generateKey(keyMD5));
+        byte[] decodedValue = Base64.getDecoder().decode(encryptedData);
+        byte[] decValue = c.doFinal(decodedValue);
+        return new String(decValue);
+    }
+
+    private static Key generateKey(byte[] keyValue) throws Exception {
+        return new SecretKeySpec(keyValue, ENCRYPTION_ALGO);
+    }
+
+    public static byte[] calculateMD5(String text) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            return md.digest(text.getBytes());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
