@@ -84,8 +84,32 @@ class CryptoUtilsTest {
         assertThrows(IllegalArgumentException.class, executable);
     }
 
-    @Test
-    void encrypt() {
+    public static Stream<Arguments> aes_encrypt_dataProvider() {
+        String whiteSpaceKey = " ";
+        String ordinaryKey = "key";
+
+        return Stream.of(
+                Arguments.of("1", whiteSpaceKey, "vQC6JrhMZ/3zkrbV2TKgMA=="),
+                Arguments.of("1", ordinaryKey, "lUFW1S2PHg6GHEx9NM6Xug=="),
+
+                Arguments.of("text", whiteSpaceKey, "rdy3zcUD2f2uGI5RMyY9jg=="),
+                Arguments.of("text", ordinaryKey, "i+JdrQvZT+JVRDB2d+Otrw=="),
+
+                Arguments.of("text with spaces", whiteSpaceKey, "jB4HFmxtMhNuTEDR8suRwchVrRsrsE4LW0dYc6tY4Po="),
+                Arguments.of("text with spaces", ordinaryKey, "MggPpBqImAJVNFTOlX1rpSrKcsAC5A0AiHqnJAKKHTA=")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("aes_encrypt_dataProvider")
+    void should_AES_encrypt_any_text(String text, String key, String expectedResult) throws Exception {
+        String result = CryptoUtils.encrypt(text, key);
+        assertEquals(expectedResult, result);
+    }
+
+    @ParameterizedTest
+    @MethodSource("aes_encrypt_dataProvider")
+    void should_throw_exception_in_aes_encryption_given_empty_key(String text) {
     }
 
     @Test
