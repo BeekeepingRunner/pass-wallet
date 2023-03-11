@@ -14,10 +14,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 import static javax.xml.crypto.dsig.SignatureMethod.HMAC_SHA512;
+import static javax.xml.crypto.dsig.SignatureMethod.SHA512_RSA_MGF1;
 
 public class CryptoUtils {
     public static final String SECRET_KEY = "ThebesTSecretKey";
     public static final String SHA_512 = "SHA-512";
+    public static final String HMAC_SHA_512 = "HmacSHA512";
     public static final int SALT_LENGTH = 20;
 
     private static final String ENCRYPTION_ALGO = "AES";
@@ -42,8 +44,8 @@ public class CryptoUtils {
     public static String calculateHMAC(String text, String key) {
         try {
             final byte[] byteKey = key.getBytes(StandardCharsets.UTF_8);
-            final Mac sha512Hmac = Mac.getInstance(HMAC_SHA512);
-            final SecretKeySpec keySpec = new SecretKeySpec(byteKey, HMAC_SHA512);
+            final Mac sha512Hmac = Mac.getInstance(HMAC_SHA_512);
+            final SecretKeySpec keySpec = new SecretKeySpec(byteKey, HMAC_SHA_512);
             sha512Hmac.init(keySpec);
             final byte[] macData = sha512Hmac.doFinal(text.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(macData);
@@ -74,7 +76,7 @@ public class CryptoUtils {
         return new String(decValue);
     }
 
-    private static Key generateKey(byte[] keyValue) throws Exception {
+    private static Key generateKey(byte[] keyValue) {
         return new SecretKeySpec(keyValue, ENCRYPTION_ALGO);
     }
 
