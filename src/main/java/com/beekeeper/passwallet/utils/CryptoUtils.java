@@ -60,6 +60,10 @@ public class CryptoUtils {
     }
 
     public static String encrypt(String data, String keyValue) throws Exception {
+        if (data.isEmpty() || keyValue.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
         Cipher c = Cipher.getInstance(ENCRYPTION_ALGO);
         final byte[] keyMD5 = calculateMD5(keyValue);
         c.init(Cipher.ENCRYPT_MODE, generateKey(keyMD5));
@@ -68,6 +72,10 @@ public class CryptoUtils {
     }
 
     public static String decrypt(String encryptedData, String keyValue) throws Exception {
+        if (encryptedData.isEmpty() || keyValue.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
         Cipher c = Cipher.getInstance(ENCRYPTION_ALGO);
         final byte[] keyMD5 = calculateMD5(keyValue);
         c.init(Cipher.DECRYPT_MODE, generateKey(keyMD5));

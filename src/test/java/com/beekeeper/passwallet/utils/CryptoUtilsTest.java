@@ -79,44 +79,70 @@ class CryptoUtilsTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"", " ", "1", "\n", "text", "text with spaces"})
-    void should_throw_exception_in_calculateHMAC_given_empty_key(String plainText) {
+    void calculateHMAC_should_throw_exception_given_empty_key(String plainText) {
         Executable executable = () -> CryptoUtils.calculateHMAC(plainText, "");
         assertThrows(IllegalArgumentException.class, executable);
     }
 
-    public static Stream<Arguments> aes_encrypt_dataProvider() {
-        String whiteSpaceKey = " ";
-        String ordinaryKey = "key";
-
+    public static Stream<Arguments> aes_encrypt_correct_data_provider() {
+        String key = "key";
         return Stream.of(
-                Arguments.of("1", whiteSpaceKey, "vQC6JrhMZ/3zkrbV2TKgMA=="),
-                Arguments.of("1", ordinaryKey, "lUFW1S2PHg6GHEx9NM6Xug=="),
-
-                Arguments.of("text", whiteSpaceKey, "rdy3zcUD2f2uGI5RMyY9jg=="),
-                Arguments.of("text", ordinaryKey, "i+JdrQvZT+JVRDB2d+Otrw=="),
-
-                Arguments.of("text with spaces", whiteSpaceKey, "jB4HFmxtMhNuTEDR8suRwchVrRsrsE4LW0dYc6tY4Po="),
-                Arguments.of("text with spaces", ordinaryKey, "MggPpBqImAJVNFTOlX1rpSrKcsAC5A0AiHqnJAKKHTA=")
+                Arguments.of("1", key, "OqYKtM0Bsww2WNwfXr2kMA=="),
+                Arguments.of("text", key, "NFy1rQG80HYx3BxOFnm3WA=="),
+                Arguments.of("text with spaces", key, "Be1KuzaZLJOiZv6Hd74n8JaylQgKK14zdRqvyYObRR4=")
         );
     }
 
     @ParameterizedTest
-    @MethodSource("aes_encrypt_dataProvider")
-    void should_AES_encrypt_any_text(String text, String key, String expectedResult) throws Exception {
+    @MethodSource("aes_encrypt_correct_data_provider")
+    void should_AES_encrypt_correctly_given_not_empty_text_and_key(String text, String key, String expectedResult) throws Exception {
         String result = CryptoUtils.encrypt(text, key);
         assertEquals(expectedResult, result);
     }
 
+    public static Stream<Arguments> aes_encrypt_incorrect_data_provider() {
+        return Stream.of(
+                Arguments.of("text", ""),
+                Arguments.of("", "key"),
+                Arguments.of("", "")
+        );
+    }
+
     @ParameterizedTest
-    @MethodSource("aes_encrypt_dataProvider")
-    void should_throw_exception_in_aes_encryption_given_empty_key(String text) {
+    @MethodSource("aes_encrypt_incorrect_data_provider")
+    void aes_encryption_should_throw_exception_given_empty_text_or_key(String text, String key) {
+        Executable executable = () -> CryptoUtils.encrypt(text, key);
+        assertThrows(IllegalArgumentException.class, executable);
     }
 
-    @Test
-    void decrypt() {
+    public static Stream<Arguments> aes_decrypt_correct_data_provider() {
+        String key = "key";
+        return Stream.of(
+                Arguments.of("OqYKtM0Bsww2WNwfXr2kMA==", key, "1"),
+                Arguments.of("NFy1rQG80HYx3BxOFnm3WA==", key, "text"),
+                Arguments.of("Be1KuzaZLJOiZv6Hd74n8JaylQgKK14zdRqvyYObRR4=", key, "text with spaces")
+        );
     }
 
-    @Test
-    void calculateMD5() {
+    @ParameterizedTest
+    @MethodSource("aes_decrypt_correct_data_provider")
+    void should_AES_decryption_correctly_given_not_empty_text_and_key(String text, String key, String expectedResult) throws Exception {
+        String result = CryptoUtils.decrypt(text, key);
+        assertEquals(expectedResult, result);
+    }
+
+    public static Stream<Arguments> aes_decrypt_incorrect_data_provider() {
+        return Stream.of(
+                Arguments.of("text", ""),
+                Arguments.of("", "key"),
+                Arguments.of("", "")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("aes_decrypt_incorrect_data_provider")
+    void AES_decryption_should_throw_exception_given_empty_text_or_key(String text, String key) throws Exception {
+        Executable executable = () -> CryptoUtils.decrypt(text, key);
+        assertThrows(IllegalArgumentException.class, executable);
     }
 }
