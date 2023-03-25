@@ -1,7 +1,6 @@
 package com.beekeeper.passwallet.controllers;
 
 import com.beekeeper.passwallet.entities.UserEntity;
-import com.beekeeper.passwallet.repositories.PasswordRepository;
 import com.beekeeper.passwallet.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +16,6 @@ import java.util.List;
 public class InfoController {
 
     private final UserRepository userRepository;
-    private final PasswordRepository passwordRepository;
 
     @GetMapping("users")
     public ResponseEntity<List<UserEntity>> getUsers() {

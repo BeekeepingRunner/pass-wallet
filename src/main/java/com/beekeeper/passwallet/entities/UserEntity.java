@@ -34,7 +34,10 @@ public class UserEntity {
     private String salt;
 
     @Column
-    private Boolean isPasswordKeptAsHmac;
+    private boolean isPasswordKeptAsHmac;
+
+    @Column
+    private boolean inModifyMode;
 
     @OneToMany
     @JoinColumn(name = "id_user")

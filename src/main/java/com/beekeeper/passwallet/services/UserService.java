@@ -1,7 +1,7 @@
 package com.beekeeper.passwallet.services;
 
 import com.beekeeper.passwallet.dto.LoginModel;
-import com.beekeeper.passwallet.dto.PassChangeRequest;
+import com.beekeeper.passwallet.dto.password.PassChangeDto;
 import com.beekeeper.passwallet.dto.PasswordStorageOption;
 import com.beekeeper.passwallet.dto.SignupModel;
 import com.beekeeper.passwallet.entities.UserEntity;
@@ -43,6 +43,7 @@ public class UserService {
         userEntity.setLogin(signupModel.getLogin());
         userEntity.setMasterPassword(signupModel.getMasterPassword());
         setUserPassword(userEntity, signupModel);
+        userEntity.setInModifyMode(true);
         return userRepository.save(userEntity);
     }
 
@@ -56,13 +57,13 @@ public class UserService {
         String plainPassword = signupModel.getPassword();
         String fullPassword = plainPassword + PEPPER;
         if (storageOption == PasswordStorageOption.SHA_513.getValue()) {
-            user.setIsPasswordKeptAsHmac(false);
+            user.setPasswordKeptAsHmac(false);
             final String salt = CryptoUtils.generateSalt();
             user.setSalt(salt);
             fullPassword += user.getSalt();
             return calculateSHA512(fullPassword);
         } else if (storageOption == PasswordStorageOption.HMAC.getValue()) {
-            user.setIsPasswordKeptAsHmac(true);
+            user.setPasswordKeptAsHmac(true);
             return calculateHMAC(fullPassword, SECRET_KEY);
         } else {
             throw new RuntimeException("Cannot sign up the user: Invalid password storage option.");
@@ -71,37 +72,42 @@ public class UserService {
 
     @Transactional
     public Optional<UserEntity> login(final LoginModel loginModel) {
-        final Optional<UserEntity> optionalUser = userRepository.findByLogin(loginModel.getLogin());
-        if (optionalUser.isPresent()) {
-            final UserEntity user = optionalUser.get();
-            String loginHash = "";
-            String plainLoginPassword = loginModel.getPassword() + PEPPER;
-            if (user.getIsPasswordKeptAsHmac()) {
-                loginHash = calculateHMAC(plainLoginPassword, SECRET_KEY);
-            } else {
-                plainLoginPassword += user.getSalt();
-                loginHash = calculateSHA512(plainLoginPassword);
+        final Optional<UserEntity> foundUser = userRepository.findByLogin(loginModel.getLogin());
+        if (foundUser.isPresent()) {
+            final UserEntity user = foundUser.get();
+            if (areCredentialsCorrect(loginModel, user)) {
+                user.setInModifyMode(loginModel.isInModifyMode());
+                return Optional.of(user);
             }
-
-            final String passwordHash = user.getPasswordHash();
-            return loginHash.equals(passwordHash)
-                    && loginModel.getMasterPassword().equals(user.getMasterPassword())
-                    ? optionalUser
-                    : Optional.empty();
-        } else {
-            return Optional.empty();
         }
+
+        return Optional.empty();
+    }
+
+    private boolean areCredentialsCorrect(LoginModel loginModel, UserEntity user) {
+        String loginHash = "";
+        String plainLoginPassword = loginModel.getPassword() + PEPPER;
+        if (user.isPasswordKeptAsHmac()) {
+            loginHash = calculateHMAC(plainLoginPassword, SECRET_KEY);
+        } else {
+            plainLoginPassword += user.getSalt();
+            loginHash = calculateSHA512(plainLoginPassword);
+        }
+
+        final String passwordHash = user.getPasswordHash();
+        return loginHash.equals(passwordHash)
+                && loginModel.getMasterPassword().equals(user.getMasterPassword());
     }
 
     @Transactional
-    public String changePassword(PassChangeRequest request) {
+    public String changePassword(PassChangeDto request) {
         final UserEntity user = getById(request.getUserId());
 
         // TODO: refactor
         // chech old pass
         String oldPassHash = "";
         String plainOldPassword = request.getOldPassword() + PEPPER;
-        if (user.getIsPasswordKeptAsHmac()) {
+        if (user.isPasswordKeptAsHmac()) {
             oldPassHash = calculateHMAC(plainOldPassword, SECRET_KEY);
         } else {
             plainOldPassword += user.getSalt();
@@ -115,7 +121,7 @@ public class UserService {
         // change pass
         String newPassHash = "";
         String plainNewPassword = request.getNewPassword() + PEPPER;
-        if (user.getIsPasswordKeptAsHmac()) {
+        if (user.isPasswordKeptAsHmac()) {
             newPassHash = calculateHMAC(plainNewPassword, SECRET_KEY);
         } else {
             user.setSalt(generateSalt());

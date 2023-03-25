@@ -1,6 +1,7 @@
 package com.beekeeper.passwallet.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,4 +28,7 @@ public class LoginModel {
     @NotEmpty
     @Size(min = 1, max = 30)
     private String masterPassword;
+
+    @NotNull
+    private boolean inModifyMode;
 }

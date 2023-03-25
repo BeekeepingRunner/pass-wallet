@@ -4,7 +4,8 @@ CREATE TABLE USER_ENTITY (
     password_hash               VARCHAR(512) NOT NULL,
     master_password             VARCHAR(512) NOT NULL,
     salt                        VARCHAR(20) NOT NULL,
-    is_password_kept_as_hmac    BOOLEAN NULL
+    is_password_kept_as_hmac    BOOLEAN NULL,
+    in_modify_mode              BOOLEAN NOT NULL
 );
 
 CREATE TABLE PASSWORD (
