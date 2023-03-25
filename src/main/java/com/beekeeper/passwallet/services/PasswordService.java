@@ -1,6 +1,7 @@
 package com.beekeeper.passwallet.services;
 
-import com.beekeeper.passwallet.dto.NewPasswordRequest;
+import com.beekeeper.passwallet.dto.password.NewPasswordDto;
+import com.beekeeper.passwallet.dto.password.PasswordEditDto;
 import com.beekeeper.passwallet.entities.Password;
 import com.beekeeper.passwallet.entities.UserEntity;
 import com.beekeeper.passwallet.repositories.PasswordRepository;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,11 +22,9 @@ public class PasswordService {
     private final PasswordRepository passwordRepository;
 
     @Transactional
-    public Password saveNewPassword(final NewPasswordRequest request) {
+    public Password saveNewPassword(final NewPasswordDto request) {
         final UserEntity user = userService.getById(request.getUserId());
-        if (!user.getMasterPassword().equals(request.getMasterPassword())) {
-            throw new RuntimeException("Cannot save new password: Master password is incorrect");
-        }
+        checkMasterPassword(request, user);
 
         final Password newPassword = new Password();
         newPassword.setLogin(request.getLogin());
@@ -40,6 +40,12 @@ public class PasswordService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Cannot save new password: Encryption error");
+        }
+    }
+
+    private void checkMasterPassword(NewPasswordDto dto, UserEntity user) {
+        if (!user.getMasterPassword().equals(dto.getMasterPassword())) {
+            throw new RuntimeException("Cannot save new password: Master password is incorrect");
         }
     }
 
@@ -65,5 +71,21 @@ public class PasswordService {
             e.printStackTrace();
             throw new RuntimeException("Cannot get user passwords: decryption error");
         }
+    }
+
+    public Optional<Password> editPassword(PasswordEditDto editDto) {
+        UserEntity user = userService.getById(editDto.getUserId());
+        checkMasterPassword(editDto, user);
+        if (!user.isInModifyMode()) {
+            return Optional.empty();
+        }
+
+        Password password = passwordRepository.getReferenceById(editDto.getPasswordId());
+        password.setLogin(editDto.getLogin());
+        password.setPassword(editDto.getPassword());
+        password.setWebAddress(editDto.getWebAddress());
+        password.setDescription(editDto.getDescription());
+        password = passwordRepository.save(password);
+        return Optional.of(password);
     }
 }

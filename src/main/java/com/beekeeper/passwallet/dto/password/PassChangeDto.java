@@ -1,11 +1,11 @@
-package com.beekeeper.passwallet.dto;
+package com.beekeeper.passwallet.dto.password;
 
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class PassChangeRequest {
+public class PassChangeDto {
 
     private Long userId;
     private String oldPassword;
