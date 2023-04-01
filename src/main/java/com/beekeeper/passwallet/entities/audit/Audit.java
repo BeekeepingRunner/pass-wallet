@@ -1,5 +1,6 @@
 package com.beekeeper.passwallet.entities.audit;
 
+import com.beekeeper.passwallet.entities.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,23 +24,33 @@ public class Audit implements Serializable {
     private Long id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_table_name", nullable = false)
-    private TableName tableName;
+    @Column(name = "id_modified_record", nullable = false)
+    private Long modifiedRecordId;
 
     @NotNull
-    @Column(name = "operation", nullable = false)
-    private String operation;
+    @Column(name = "present_record_value", nullable = false)
+    private String presentRecordValue;
 
     @NotNull
-    @Column(name = "modified_by", nullable = false)
-    private String modifiedBy;
+    @Column(name = "previous_record_value", nullable = true)
+    private String previousRecordValue;
 
     @NotNull
     @Column(name = "modified_at", nullable = false)
     private LocalDateTime modifiedAt;
 
     @NotNull
-    @Column(name = "payload")
-    private String payload;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_modifying_user")
+    private UserEntity modifyingUser;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_table_name", nullable = false)
+    private TableName tableName;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_operation_type", nullable = false)
+    private OperationType operationType;
 }

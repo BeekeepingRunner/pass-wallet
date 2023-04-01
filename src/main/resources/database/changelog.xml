@@ -56,4 +56,65 @@
                                  referencedTableName="user_entity"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="CREATE_GENERAL_AUDIT_TABLE" author="Bartosz Biegajło">
+
+        <createTable tableName="operation_type">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_operation_type_name"/>
+            </column>
+            <column name="description" type="VARCHAR(256)"/>
+        </createTable>
+
+        <createTable tableName="table_name">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="table_name" type="VARCHAR(128)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_table_name"/>
+            </column>
+            <column name="description" type="VARCHAR(256)"/>
+        </createTable>
+
+        <createTable tableName="audit">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_modified_record" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="present_record_value" type="VARCHAR(2048)"/>
+            <column name="previous_record_value" type="VARCHAR(2048)"/>
+            <column name="modified_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_modifying_user" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_table_name" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_operation_type" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_modifying_user"
+                                 constraintName="fk_audit_modifying_user"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_table_name"
+                                 constraintName="fk_audit_table_name"
+                                 referencedTableName="table_name"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_operation_type"
+                                 constraintName="fk_audit_operation_type"
+                                 referencedTableName="operation_type"
+                                 referencedColumnNames="id"/>
+    </changeSet>
 </databaseChangeLog>
