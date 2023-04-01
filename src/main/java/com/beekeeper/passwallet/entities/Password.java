@@ -9,11 +9,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
-import org.hibernate.envers.Audited;
 
 @Entity
 @Data
-@Audited
 public class Password {
 
     @Id

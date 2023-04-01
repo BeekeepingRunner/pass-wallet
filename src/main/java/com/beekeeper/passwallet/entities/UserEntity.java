@@ -9,13 +9,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import lombok.Data;
-import org.hibernate.envers.Audited;
 
 import java.util.Collection;
 
 @Entity
 @Data
-@Audited
 public class UserEntity {
 
     @Id
