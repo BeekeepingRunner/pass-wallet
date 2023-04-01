@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="CREATE_INITIAL_DATABASE_STRUCTURE" author="Bartosz Biegajło">
+
+        <createTable tableName="user_entity">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(30)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_user_login"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="master_password" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="salt" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_password_kept_as_hmac" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="in_modify_mode" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="user_entity_aud">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="master_password" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="salt" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_password_kept_as_hmac" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="in_modify_mode" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="rev" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="revtype" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="user_entity_aud" baseColumnNames="id"
+                                 constraintName="fk_user_entity_aud_id"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="password">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="web_address" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="id_user" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="password" baseColumnNames="id_user" constraintName="fk_password_user"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="password_aud">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="web_address" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="id_user" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="rev" type="INT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="revtype" type="TINYINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="password_aud" baseColumnNames="id" constraintName="fk_password_aud_id"
+                                 referencedTableName="password"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+</databaseChangeLog>
