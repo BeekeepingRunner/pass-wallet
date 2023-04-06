@@ -1,6 +1,7 @@
 package com.beekeeper.passwallet.aspect;
 
 import com.beekeeper.passwallet.dto.password.NewPasswordDto;
+import com.beekeeper.passwallet.dto.password.PasswordEditDto;
 import com.beekeeper.passwallet.entities.UserEntity;
 import com.beekeeper.passwallet.entities.audit.Function;
 import com.beekeeper.passwallet.entities.audit.FunctionRun;
@@ -44,6 +45,11 @@ public class FunctionRunAspect {
         final String methodSignature = joinPoint.getSignature().toString();
         if (methodSignature.contains("PasswordService.saveNewPassword")) {
             NewPasswordDto dto = (NewPasswordDto) joinPoint.getArgs()[0];
+            final Long userId = dto.getUserId();
+            return userRepository.findById(userId);
+        }
+        if (methodSignature.contains("PasswordService.editPassword")) {
+            PasswordEditDto dto = (PasswordEditDto) joinPoint.getArgs()[0];
             final Long userId = dto.getUserId();
             return userRepository.findById(userId);
         }
