@@ -54,7 +54,9 @@
 
         <addForeignKeyConstraint baseTableName="password" baseColumnNames="id_user" constraintName="fk_password_user"
                                  referencedTableName="user_entity"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="CASCADE"/>
     </changeSet>
 
     <changeSet id="CREATE_GENERAL_AUDIT_TABLE" author="Bartosz Biegajło">
@@ -105,17 +107,23 @@
         <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_modifying_user"
                                  constraintName="fk_audit_modifying_user"
                                  referencedTableName="user_entity"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
 
         <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_table_name"
                                  constraintName="fk_audit_table_name"
                                  referencedTableName="table_name"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
 
         <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_operation_type"
                                  constraintName="fk_audit_operation_type"
                                  referencedTableName="operation_type"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
     </changeSet>
 
     <changeSet id="CREATE_FUNCTION_EXECUTION_AUDIT_TABLES" author="Bartosz Biegajło">
@@ -148,12 +156,16 @@
         <addForeignKeyConstraint baseTableName="function_run" baseColumnNames="id_launching_user"
                                  constraintName="fk_function_run_user"
                                  referencedTableName="user_entity"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="CASCADE"/>
 
         <addForeignKeyConstraint baseTableName="function_run" baseColumnNames="id_function"
                                  constraintName="fk_function_run_function"
                                  referencedTableName="function"
-                                 referencedColumnNames="id"/>
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
     </changeSet>
 
 </databaseChangeLog>
