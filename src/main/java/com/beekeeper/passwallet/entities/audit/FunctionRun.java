@@ -33,4 +33,8 @@ public class FunctionRun {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_function", nullable = false)
     private Function function;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_launching_user")
+    private UserEntity launchingUser;
 }
