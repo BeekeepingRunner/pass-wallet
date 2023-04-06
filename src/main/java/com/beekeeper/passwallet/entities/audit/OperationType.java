@@ -21,7 +21,6 @@ public class OperationType implements Serializable {
     @SequenceGenerator(name = "operationTypeSequenceGenerator")
     private Long id;
 
-    @NotNull
     @Column(nullable = false)
     private String name;
 

@@ -117,4 +117,43 @@
                                  referencedTableName="operation_type"
                                  referencedColumnNames="id"/>
     </changeSet>
+
+    <changeSet id="CREATE_FUNCTION_EXECUTION_AUDIT_TABLES" author="Bartosz Biegajło">
+
+        <createTable tableName="function">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(256)"/>
+        </createTable>
+
+        <createTable tableName="function_run">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="execution_timestamp" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_launching_user" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_function" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="function_run" baseColumnNames="id_launching_user"
+                                 constraintName="fk_function_run_user"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint baseTableName="function_run" baseColumnNames="id_function"
+                                 constraintName="fk_function_run_function"
+                                 referencedTableName="function"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>

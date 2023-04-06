@@ -21,7 +21,6 @@ public class TableName implements Serializable {
     @SequenceGenerator(name = "tableNameSequenceGenerator")
     private Long id;
 
-    @NotNull
     @Column(name = "table_name", nullable = false)
     private String tableName;
 
