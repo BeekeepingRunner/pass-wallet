@@ -3,6 +3,7 @@ package com.beekeeper.passwallet.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,11 +13,12 @@ import lombok.Data;
 
 @Entity
 @Data
+@EntityListeners(PasswordEntityListener.class)
 public class Password {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column
     private String login;
@@ -34,4 +36,16 @@ public class Password {
     @ManyToOne
     @JoinColumn(name = "id_user")
     private UserEntity user;
+
+    @Override
+    public String toString() {
+        return "Password{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", web_address='" + webAddress + '\'' +
+                ", description='" + description + '\'' +
+                ", user_id=" + user.getId() +
+                '}';
+    }
 }

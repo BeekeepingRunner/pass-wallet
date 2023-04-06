@@ -6,9 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -16,9 +14,9 @@ import java.util.Collection;
 @Entity
 @Table(name = "operation_type")
 public class OperationType implements Serializable {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "operationTypeSequenceGenerator")
-    @SequenceGenerator(name = "operationTypeSequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)

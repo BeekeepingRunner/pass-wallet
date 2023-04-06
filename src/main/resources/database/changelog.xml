@@ -85,17 +85,13 @@
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="id_modified_record" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
+            <column name="id_modified_record" type="BIGINT"/>
             <column name="present_record_value" type="VARCHAR(2048)"/>
             <column name="previous_record_value" type="VARCHAR(2048)"/>
             <column name="modified_at" type="DATETIME">
                 <constraints nullable="false"/>
             </column>
-            <column name="id_modifying_user" type="BIGINT">
-                <constraints nullable="false"/>
-            </column>
+            <column name="id_modifying_user" type="BIGINT"/>
             <column name="id_table_name" type="BIGINT">
                 <constraints nullable="false"/>
             </column>
@@ -157,6 +153,27 @@
                                  referencedColumnNames="id"
                                  onUpdate="CASCADE"
                                  onDelete="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="ADD_TABLE_NAME_AND_OPERATION_TYPES" author="Bartosz Biegajło">
+        <insert tableName="table_name">
+            <column name="id" value="1"/>
+            <column name="table_name" value="password"/>
+            <column name="description" value="for storing passwords added by users to their wallets"/>
+        </insert>
+
+        <insert tableName="operation_type">
+            <column name="id" value="1"/>
+            <column name="name" value="create"/>
+        </insert>
+        <insert tableName="operation_type">
+            <column name="id" value="2"/>
+            <column name="name" value="update"/>
+        </insert>
+        <insert tableName="operation_type">
+            <column name="id" value="3"/>
+            <column name="name" value="delete"/>
+        </insert>
     </changeSet>
 
 </databaseChangeLog>

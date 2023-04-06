@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,8 +22,7 @@ import java.time.LocalDateTime;
 public class FunctionRun {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "functionRunSequenceGenerator")
-    @SequenceGenerator(name = "functionRunSequenceGenerator")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "execution_timestamp", nullable = false)
