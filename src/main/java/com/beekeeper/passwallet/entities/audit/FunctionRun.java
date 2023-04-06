@@ -11,9 +11,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "function_run")
 public class FunctionRun {
@@ -29,8 +33,4 @@ public class FunctionRun {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_function", nullable = false)
     private Function function;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_launching_user", nullable = false)
-    private UserEntity launchingUser;
 }

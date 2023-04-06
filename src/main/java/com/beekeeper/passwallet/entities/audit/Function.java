@@ -6,8 +6,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class Function {
 
     @Id
@@ -16,7 +20,7 @@ public class Function {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String signature;
 
     @Column
     private String description;
