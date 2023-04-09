@@ -6,7 +6,6 @@ import com.beekeeper.passwallet.repositories.audit.AuditRepository;
 import com.beekeeper.passwallet.repositories.audit.OperationTypeRepository;
 import com.beekeeper.passwallet.repositories.audit.TableNameRepository;
 import jakarta.persistence.PostPersist;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Component
 @Configurable(autowire = Autowire.BY_TYPE, dependencyCheck = true)
@@ -41,23 +41,19 @@ public class PasswordEntityListener {
         PasswordEntityListener.operationTypeRepository = operationTypeRepository;
     }
 
-    @PrePersist
+    @PostPersist
     @Transactional
-    public void beforeFirstSave(Password password) {
-        if (password.getId() == null) {
+    public void afterFirstSave(Password password) {
+        Optional<Audit> recordAudit = auditRepository.findByModifiedRecordId(password.getId());
+        if (recordAudit.isEmpty()) {
             final Audit audit = new Audit();
             audit.setModifiedAt(LocalDateTime.now());
             audit.setTableName(tableNameRepository.getReferenceById(PASSWORD_TABLE_NAME_ID));
             audit.setOperationType(operationTypeRepository.getReferenceById(CREATE_OPERATION_ID));
             audit.setPresentRecordValue(password.toString());
+            audit.setModifiedRecordId(password.getId());
             auditRepository.save(audit);
         }
-    }
-
-    @PostPersist
-    @Transactional
-    public void afterFirstSave(Password password) {
-        // aaaa
     }
 
     @PreUpdate

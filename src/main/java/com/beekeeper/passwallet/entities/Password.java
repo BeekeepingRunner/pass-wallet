@@ -37,14 +37,19 @@ public class Password {
     @JoinColumn(name = "id_user")
     private UserEntity user;
 
+    public static final String LOGIN_STR = "login";
+    public static final String PASSWORD_STR = "password";
+    public static final String WEB_ADDRESS_STR = "web_address";
+    public static final String DESCRIPTION_STR = "description";
+
     @Override
     public String toString() {
         return "Password{" +
                 "id=" + id +
-                ", login='" + login + '\'' +
-                ", password='" + password + '\'' +
-                ", web_address='" + webAddress + '\'' +
-                ", description='" + description + '\'' +
+                ", " + LOGIN_STR + "=;;;" + login + ";;;" +
+                ", " + PASSWORD_STR + "=;;;" + password + "=;;;" +
+                ", " + WEB_ADDRESS_STR + "=;;;" + webAddress + "=;;;" +
+                ", " + DESCRIPTION_STR + "=;;;" + description + "=;;;" +
                 ", user_id=" + user.getId() +
                 '}';
     }
