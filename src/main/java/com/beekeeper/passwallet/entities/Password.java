@@ -13,7 +13,6 @@ import lombok.Data;
 
 @Entity
 @Data
-@EntityListeners(PasswordEntityListener.class)
 public class Password {
 
     @Id

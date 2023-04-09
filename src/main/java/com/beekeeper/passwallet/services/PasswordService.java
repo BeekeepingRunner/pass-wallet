@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class PasswordService {
 
     private final UserService userService;
+    private final AuditService auditService;
     private final PasswordRepository passwordRepository;
 
     @Transactional
@@ -28,13 +29,16 @@ public class PasswordService {
 
         String encryptedPassword = encrypt(request.getPassword(), user);
 
-        final Password newPassword = new Password();
+        Password newPassword = new Password();
         newPassword.setLogin(request.getLogin());
         newPassword.setDescription(request.getDescription());
         newPassword.setWebAddress(request.getWebAddress());
         newPassword.setUser(user);
         newPassword.setPassword(encryptedPassword);
-        return passwordRepository.save(newPassword);
+        newPassword = passwordRepository.save(newPassword);
+        auditService.auditPasswordOnSave(newPassword);
+
+        return newPassword;
     }
 
     private void checkMasterPassword(NewPasswordDto dto, UserEntity user) {
@@ -90,6 +94,8 @@ public class PasswordService {
         password.setWebAddress(editDto.getWebAddress());
         password.setDescription(editDto.getDescription());
         password = passwordRepository.save(password);
+        auditService.auditPasswordOnUpdate(password);
+
         return Optional.of(password);
     }
 }
