@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class PasswordService {
 
     private final UserService userService;
+    private final AuditService auditService;
     private final PasswordRepository passwordRepository;
 
     @Transactional
@@ -26,26 +27,31 @@ public class PasswordService {
         final UserEntity user = userService.getById(request.getUserId());
         checkMasterPassword(request, user);
 
-        final Password newPassword = new Password();
+        String encryptedPassword = encrypt(request.getPassword(), user);
+
+        Password newPassword = new Password();
         newPassword.setLogin(request.getLogin());
         newPassword.setDescription(request.getDescription());
         newPassword.setWebAddress(request.getWebAddress());
         newPassword.setUser(user);
+        newPassword.setPassword(encryptedPassword);
+        newPassword = passwordRepository.save(newPassword);
+        auditService.auditPasswordOnSave(newPassword);
 
-        try {
-            final String plainRequestPassword = request.getPassword();
-            final String encryptedPassword = CryptoUtils.encrypt(plainRequestPassword, user.getMasterPassword());
-            newPassword.setPassword(encryptedPassword);
-            return passwordRepository.save(newPassword);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Cannot save new password: Encryption error");
-        }
+        return newPassword;
     }
 
     private void checkMasterPassword(NewPasswordDto dto, UserEntity user) {
         if (!user.getMasterPassword().equals(dto.getMasterPassword())) {
             throw new RuntimeException("Cannot save new password: Master password is incorrect");
+        }
+    }
+
+    private String encrypt(String plainPassword, UserEntity user) {
+        try {
+            return CryptoUtils.encrypt(plainPassword, user.getMasterPassword());
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot encrypt password for user wallet (user id = " + user.getId() + ")");
         }
     }
 
@@ -81,11 +87,15 @@ public class PasswordService {
         }
 
         Password password = passwordRepository.getReferenceById(editDto.getPasswordId());
+        String encryptedPassword = encrypt(editDto.getPassword(), user);
+
         password.setLogin(editDto.getLogin());
-        password.setPassword(editDto.getPassword());
+        password.setPassword(encryptedPassword);
         password.setWebAddress(editDto.getWebAddress());
         password.setDescription(editDto.getDescription());
         password = passwordRepository.save(password);
+        auditService.auditPasswordOnUpdate(password);
+
         return Optional.of(password);
     }
 }

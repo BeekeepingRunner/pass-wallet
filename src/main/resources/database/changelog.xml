@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="CREATE_INITIAL_DATABASE_STRUCTURE" author="Bartosz Biegajło">
+
+        <createTable tableName="user_entity">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(30)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_user_login"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="master_password" type="VARCHAR(512)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="salt" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_password_kept_as_hmac" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+            <column name="in_modify_mode" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="password">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="web_address" type="VARCHAR(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="VARCHAR(256)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="id_user" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="password" baseColumnNames="id_user" constraintName="fk_password_user"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+
+    <changeSet id="CREATE_GENERAL_AUDIT_TABLE" author="Bartosz Biegajło">
+
+        <createTable tableName="operation_type">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_operation_type_name"/>
+            </column>
+            <column name="description" type="VARCHAR(256)"/>
+        </createTable>
+
+        <createTable tableName="table_name">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="table_name" type="VARCHAR(128)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_table_name"/>
+            </column>
+            <column name="description" type="VARCHAR(256)"/>
+        </createTable>
+
+        <createTable tableName="audit">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id_modified_record" type="BIGINT"/>
+            <column name="present_record_value" type="VARCHAR(2048)"/>
+            <column name="previous_record_value" type="VARCHAR(2048)"/>
+            <column name="modified_at" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_modifying_user" type="BIGINT"/>
+            <column name="id_table_name" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_operation_type" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_modifying_user"
+                                 constraintName="fk_audit_modifying_user"
+                                 referencedTableName="user_entity"
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
+
+        <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_table_name"
+                                 constraintName="fk_audit_table_name"
+                                 referencedTableName="table_name"
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
+
+        <addForeignKeyConstraint baseTableName="audit" baseColumnNames="id_operation_type"
+                                 constraintName="fk_audit_operation_type"
+                                 referencedTableName="operation_type"
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="CREATE_FUNCTION_EXECUTION_AUDIT_TABLES" author="Bartosz Biegajło">
+
+        <createTable tableName="function">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="signature" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(256)"/>
+        </createTable>
+
+        <createTable tableName="function_run">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="execution_timestamp" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_launching_user" type="bigint"/>
+            <column name="id_function" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="function_run" baseColumnNames="id_function"
+                                 constraintName="fk_function_run_function"
+                                 referencedTableName="function"
+                                 referencedColumnNames="id"
+                                 onUpdate="CASCADE"
+                                 onDelete="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="ADD_TABLE_NAME_AND_OPERATION_TYPES" author="Bartosz Biegajło">
+        <insert tableName="table_name">
+            <column name="id" value="1"/>
+            <column name="table_name" value="password"/>
+            <column name="description" value="for storing passwords added by users to their wallets"/>
+        </insert>
+
+        <insert tableName="operation_type">
+            <column name="id" value="1"/>
+            <column name="name" value="create"/>
+        </insert>
+        <insert tableName="operation_type">
+            <column name="id" value="2"/>
+            <column name="name" value="update"/>
+        </insert>
+        <insert tableName="operation_type">
+            <column name="id" value="3"/>
+            <column name="name" value="delete"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
